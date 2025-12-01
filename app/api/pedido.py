@@ -7,6 +7,7 @@ from app.gateways.pedido_produto_gateway import PedidoProdutoGateway
 from app.controllers.pedido_controller import PedidoController
 from app.adapters.presenters.pedido_presenter import PedidoResponse
 from app.adapters.dto.pedido_dto import PedidoCreateSchema, PedidoAtualizaSchema
+from app.adapters.utils.debug import var_dump_die
 
 router = APIRouter(prefix="/pedidos", tags=["pedidos"])
 

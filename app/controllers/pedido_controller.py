@@ -15,7 +15,7 @@ class PedidoController:
     def criar_pedido(self, pedido, pedidoProdutosGateway):
         try:
             orderUseCase = PedidoUseCase(self.db_session).criar_pedido(pedido)
-            
+
             productOrderUseCase = (PedidoProdutosUseCase(pedidoProdutosGateway)
                 .criarPedidoProdutos(orderUseCase.id, pedido.produtos))
             

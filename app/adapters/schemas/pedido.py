@@ -15,8 +15,7 @@ class PedidoResponseSchema(BaseModel):
     data_alteracao: Optional[datetime.time]
     data_finalizacao: Optional[datetime.time]
     
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(validate_by_name=True)
     
 class PedidoProdutosResponseSchema(BaseModel):
     id: int
@@ -27,6 +26,5 @@ class PedidoProdutosResponseSchema(BaseModel):
     data_finalizacao: Optional[datetime.time]
     produtos: List[int]
     
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(validate_by_name=True)
 
