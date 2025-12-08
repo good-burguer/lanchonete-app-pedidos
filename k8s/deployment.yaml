@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lanchonete-pedidos
+  namespace: app
+  labels:
+    app: lanchonete-pedidos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lanchonete-pedidos
+  template:
+    metadata:
+      labels:
+        app: lanchonete-pedidos
+    spec:
+      containers:
+        - name: lanchonete-pedidos
+          image: ${IMAGE_URI} 
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000 
+          
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: host
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: dbname 
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: password

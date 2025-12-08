@@ -1,0 +1,90 @@
+name: CD - pedidos
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  deploy:
+    name: Build & Push & Deploy (pedidos)
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-session-name: lanchonete-pedidos-cd
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          IMAGE_URI=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+          echo "Building image ${IMAGE_URI}"
+          # Verifique se o caminho do Dockerfile está correto na sua estrutura
+          docker build -t "${IMAGE_URI}" -f .docker/bin/Dockerfile .
+          docker push "${IMAGE_URI}"     
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name gb-dev-eks \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Deploy Kubernetes manifests
+        env:
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          export IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+          echo "Using image: $IMAGE_URI"
+
+          # "registra" a imagem no K8s
+          envsubst < k8s/deployment.yaml | kubectl apply -n app -f -
+          kubectl apply -n app -f k8s/service.yaml
+
+      - name: Wait for rollout to finish
+        run: |
+          kubectl rollout status deployment/lanchonete-pedidos -n app --timeout=120s
+
+      - name: Debug deployment on failure
+        if: failure()
+        run: |
+          echo "==== Deployment describe ===="
+          kubectl describe deployment lanchonete-pedidos -n app || true
+
+          echo "==== Pods (label app=lanchonete-pedidos) ===="
+          kubectl get pods -n app -l app=lanchonete-pedidos -o wide || true
+
+          echo "==== Selecting first pod for detailed logs ===="
+          POD_NAME=$(kubectl get pods -n app -l app=lanchonete-pedidos -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          
+          if [ -n "$POD_NAME" ]; then
+            kubectl logs "$POD_NAME" -n app || true
+          fi
