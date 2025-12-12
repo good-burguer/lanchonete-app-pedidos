@@ -72,10 +72,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_GB3 }}
         with:
           projectBaseDir: .
-          args: >
-            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
-            -Dsonar.python.coverage.reportPaths=coverage.xml
 
       - name: Install envsubst
         shell: bash
