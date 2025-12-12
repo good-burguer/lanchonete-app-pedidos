@@ -16,9 +16,10 @@ spec:
         app: lanchonete-pedidos
     spec:
       terminationGracePeriodSeconds: 30
+      serviceAccountName: lanchonete-app-sa
       containers:
         - name: lanchonete-pedidos
-          image: ${IMAGE_URI}
+          image: "${IMAGE_URI}"
           imagePullPolicy: Always
           ports:
             - name: http
@@ -32,7 +33,8 @@ spec:
               cpu: "300m"
               memory: "256Mi"
 
-          # Probes padronizados (evita depender do path HTTP; usa TCP no port 8000)
+          # Probes (TCP) — valida que o processo está aceitando conexões.
+          # Se quiser evoluir para HTTP, trocamos para httpGet /health depois.
           readinessProbe:
             tcpSocket:
               port: 8000
@@ -55,6 +57,7 @@ spec:
             failureThreshold: 30
             periodSeconds: 5
 
+          # Conexão com o RDS via Secret (namespace app)
           env:
             - name: DB_HOST
               valueFrom:
