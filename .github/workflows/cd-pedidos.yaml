@@ -65,13 +65,14 @@ jobs:
       # Requires:
       # - Secret: SONAR_TOKEN_GB3
       # - Vars: SONAR_ORGANIZATION, SONAR_PROJECT_KEY
-      - name: SonarCloud Scan (main)
-        if: ${{ always() && secrets.SONAR_TOKEN_GB3 != '' && vars.SONAR_ORGANIZATION != '' && vars.SONAR_PROJECT_KEY != '' }}
+      - name: SonarCloud Scan
+        if: always()
         uses: sonarsource/sonarcloud-github-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_GB3 }}
         with:
           projectBaseDir: .
+
 
       - name: Install envsubst
         shell: bash
