@@ -6,7 +6,7 @@ metadata:
 spec:
   type: ClusterIP  
   selector:
-    app: lanchonete-producao
+    app: lanchonete-pedidos
   ports:
     - protocol: TCP
       port: 80
