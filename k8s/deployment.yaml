@@ -15,20 +15,45 @@ spec:
       labels:
         app: lanchonete-pedidos
     spec:
+      terminationGracePeriodSeconds: 30
       containers:
         - name: lanchonete-pedidos
-          image: ${IMAGE_URI} 
+          image: ${IMAGE_URI}
           imagePullPolicy: Always
           ports:
-            - containerPort: 8000 
-          
+            - name: http
+              containerPort: 8000
+
           resources:
-            limits:
-              memory: "256Mi"
-              cpu: "300m"
             requests:
-              memory: "128Mi"
               cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+
+          # Probes padronizados (evita depender do path HTTP; usa TCP no port 8000)
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          startupProbe:
+            tcpSocket:
+              port: 8000
+            failureThreshold: 30
+            periodSeconds: 5
 
           env:
             - name: DB_HOST
@@ -40,7 +65,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-credentials
-                  key: dbname 
+                  key: dbname
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
