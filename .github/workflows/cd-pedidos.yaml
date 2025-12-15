@@ -140,7 +140,7 @@ jobs:
 
       - name: Wait for rollout to finish
         run: |
-          kubectl rollout status deployment/lanchonete-pedidos -n "${{ vars.K8S_NAMESPACE }}" --timeout=180s
+          kubectl rollout status deployment/lanchonete-pedidos -n "${{ vars.K8S_NAMESPACE }}" --timeout=120s
 
       - name: Debug deployment on failure
         if: failure()
