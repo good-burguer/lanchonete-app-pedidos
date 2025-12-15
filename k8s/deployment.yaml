@@ -23,7 +23,7 @@ spec:
           imagePullPolicy: Always
           ports:
             - name: http
-              containerPort: 8000
+              containerPort: 8080
 
           resources:
             requests:
@@ -37,7 +37,7 @@ spec:
           # Se quiser evoluir para HTTP, trocamos para httpGet /health depois.
           readinessProbe:
             tcpSocket:
-              port: 8000
+              port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 2
@@ -45,7 +45,7 @@ spec:
 
           livenessProbe:
             tcpSocket:
-              port: 8000
+              port: 8080
             initialDelaySeconds: 15
             periodSeconds: 20
             timeoutSeconds: 2
@@ -53,7 +53,7 @@ spec:
 
           startupProbe:
             tcpSocket:
-              port: 8000
+              port: 8080
             failureThreshold: 30
             periodSeconds: 5
 
