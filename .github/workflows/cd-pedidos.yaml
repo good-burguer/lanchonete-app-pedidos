@@ -58,6 +58,8 @@ jobs:
         if: ${{ hashFiles('tests/**') != '' }}
         env:
           PYTHONPATH: .
+          # Dummy DB for CI/CD to avoid requiring AWS Secrets Manager / RDS during test collection
+          DATABASE_URL: "sqlite+pysqlite:///:memory:"
         run: |
           python -m pytest tests --cov=app --cov-report=xml:coverage.xml
 
