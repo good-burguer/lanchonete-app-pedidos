@@ -6,6 +6,7 @@ pytest
 pytest-bdd
 python-dotenv
 psycopg2-binary
+boto3
 alembic
 httpx
 pytest
