@@ -19,6 +19,7 @@ jobs:
       ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
       EKS_CLUSTER_NAME: ${{ vars.EKS_CLUSTER_NAME }}
       K8S_NAMESPACE: ${{ vars.K8S_NAMESPACE }}
+      IRSA_ROLE_ARN: ${{ vars.IRSA_ROLE_ARN }}
 
     permissions:
       id-token: write
@@ -125,6 +126,7 @@ jobs:
         run: |
           set -euo pipefail
           export IMAGE_URI="${ECR_REGISTRY}/${{ vars.ECR_REPOSITORY }}:${IMAGE_TAG}"
+          export IRSA_ROLE_ARN="${IRSA_ROLE_ARN}"
           echo "Using image: ${IMAGE_URI}"
 
           # Apply ONLY the deployment via envsubst (so IMAGE_URI is injected)
@@ -140,11 +142,18 @@ jobs:
 
       - name: Wait for rollout to finish
         run: |
-          kubectl rollout status deployment/lanchonete-pedidos -n "${{ vars.K8S_NAMESPACE }}" --timeout=120s
+          kubectl rollout status deployment/lanchonete-pedidos -n "${{ vars.K8S_NAMESPACE }}" --timeout=600s
 
       - name: Debug deployment on failure
         if: failure()
         run: |
+          echo "==== ReplicaSets ===="
+          kubectl get rs -n "${{ vars.K8S_NAMESPACE }}" -l app=lanchonete-pedidos -o wide || true
+          kubectl describe rs -n "${{ vars.K8S_NAMESPACE }}" -l app=lanchonete-pedidos || true
+
+          echo "==== Events (namespace) ===="
+          kubectl get events -n "${{ vars.K8S_NAMESPACE }}" --sort-by=.lastTimestamp | tail -n 80 || true
+
           echo "==== Deployment describe ===="
           kubectl describe deployment lanchonete-pedidos -n "${{ vars.K8S_NAMESPACE }}" || true
 
