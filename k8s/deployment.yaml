@@ -1,3 +1,23 @@
+# Namespace (idempotente) — garante que o namespace exista antes do deploy
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app
+
+---
+
+# ServiceAccount (IRSA) — evita FailedCreate quando o SA ainda não existe no cluster
+# Requer que a pipeline faça envsubst e forneça IRSA_ROLE_ARN.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: lanchonete-app-sa
+  namespace: app
+  annotations:
+    eks.amazonaws.com/role-arn: "${IRSA_ROLE_ARN}"
+
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
