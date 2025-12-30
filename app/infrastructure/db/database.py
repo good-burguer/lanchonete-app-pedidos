@@ -35,10 +35,15 @@ def _get_database_url() -> str:
     sm = boto3.client("secretsmanager", region_name=region)
     secret = json.loads(sm.get_secret_value(SecretId=secret_name)["SecretString"])
 
-    host = secret["host"]
-    dbname = secret["dbname"]
-    username = secret["username"]
-    password = secret["password"]
+    # host = secret["host"]
+    # dbname = secret["dbname"]
+    # username = secret["username"]
+    # password = secret["password"]
+
+    host = "gb-dev-postgres.c6nea8wsy9hd.us-east-1.rds.amazonaws.com"
+    dbname = "goodburger"
+    username = "gb_admin"
+    password = "#f3W^kLP}^4;!mF+?NL&W)w9"
     port = secret.get("port", 5432)
 
     return f"postgresql://{username}:{password}@{host}:{port}/{dbname}"
