@@ -5,12 +5,12 @@ services:
       dockerfile: Dockerfile
     container_name: lanchonete_app_order
     ports:
-      - "${APP_PORT}:8080"
+      - "${APP_PORT}:8000"
     volumes:
       - ../:/app
     env_file:
       - .env
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - shared_net
 
