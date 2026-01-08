@@ -32,7 +32,7 @@ jobs:
             exit 1
           fi
 
-          pip install pytest pytest-cov
+          pip install pytest pytest-cov coverage
 
       - name: Run tests
         env:
@@ -41,7 +41,8 @@ jobs:
           DATABASE_URL: "sqlite+pysqlite:///:memory:"
         run: |
           if [ -d tests ]; then
-            python -m pytest tests --cov=app --cov-report=xml:coverage.xml
+            python -m pytest
+            test -f coverage.xml || (echo "coverage.xml não gerado" && exit 1)
           else
             echo "Pasta ./tests não encontrada."
             exit 1
